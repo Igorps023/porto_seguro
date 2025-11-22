@@ -1,0 +1,24 @@
+{
+    "name": "Python 3.9 with Spark",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-toolsai.jupyter",
+                "charliermarsh.ruff"
+            ]
+        }
+    },
+    "forwardPorts": [
+        8888
+    ],
+    "portsAttributes": {
+        "8888": {
+            "label": "Jupyter Notebook",
+            "onAutoForward": "openBrowser"
+        }
+    }
+}

@@ -1,0 +1,7 @@
+python-dotenv==1.2.1
+pandas==2.3.3
+scikit-learn==1.5.1
+pyspark==3.5.0
+ruff==0.14.6
+ipykernel
+jupyter
