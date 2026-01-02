@@ -2,8 +2,8 @@
 .vscode/*
 *spark-warehouse/*
 tes.py
-explore.py
-explore copy.py
+code/explore.py
+code/explore copy.py
 porto_seguro/old_code.py
 pod_academy_functions.py
 data/*.csv
