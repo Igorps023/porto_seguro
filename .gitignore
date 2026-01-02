@@ -2,3 +2,6 @@
 data/*
 .vscode/*
 *spark-warehouse/*
+tes.py
+explore.py
+explore copy.py

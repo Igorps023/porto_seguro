@@ -1,4 +1,10 @@
 # %%
+import sys
+import os
+
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+# %%
 from sklearn import tree
 import pandas as pd
 import numpy as np
@@ -11,16 +17,21 @@ def replace_minus_one_for_nan(dataframe: pd.DataFrame):
     dataframe_01.replace(-1, np.nan, inplace=True)
     return dataframe_01
 
-
 # %%
-data_00 = pd.read_csv("../porto_seguro/data/train.csv")
+data_00 = pd.read_csv("../data/train.csv")
+data_00 = replace_minus_one_for_nan(data_00)
+# %%
 metadata_00 = generate_metadata(data_00)  # documentation only
 ingestion_cols = metadata_00.nome_variavel.to_list()
+
+metadata_00_no_id_tgt = metadata_00.copy().query("nome_variavel != ('id', 'target')")
+metadata_00_no_id_tgt
 # %%
 prep_cols_to_remove = ["id", "target"]
 feature_cols = [x for x in data_00.columns if x not in prep_cols_to_remove]
 # %%
 x, y = data_00[feature_cols], data_00['target']
+
 # %%
 X_train, X_test, y_train, y_test = train_test_split(
     x,
@@ -30,11 +41,6 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y
 )
 
-# Replace -1 with Null
-data_00 = replace_minus_one_for_nan(data_00)
-metadata_00 = generate_metadata(data_00)
-metadata_00_no_id_tgt = metadata_00.copy().query("nome_variavel != ('id', 'target')")
-metadata_00_no_id_tgt
 # %%
 # Generate High Null % to drop
 cutoff_value = 68
@@ -43,6 +49,38 @@ cols_high_null_drop = (metadata_00_no_id_tgt[metadata_00_no_id_tgt["percent_nulo
                        .to_list()
                         )
 cols_high_null_drop
+# %% 
+# Filtragem de Colunas e Definição de Tipos
+# 1. Identificar as colunas que sobrevivem ao cutoff
+# Pegamos apenas as variáveis que NÃO estão na lista de drop
+cols_to_keep = [col for col in feature_cols if col not in cols_high_null_drop]
+
+# 2. Filtrar os metadados para as colunas que ficaram
+metadata_filtered = metadata_00_no_id_tgt[metadata_00_no_id_tgt["nome_variavel"].isin(cols_to_keep)]
+
+# 3. Identificar Categóricas e Numéricas (Baseado nos metadados filtrados)
+cat_cols = metadata_filtered[metadata_filtered["tipo"] == np.dtype("object")]
+
+# %%
+if len(cat_cols) > 0:
+    cutoff_encoding = 20
+    cat_cols_one_hot = cat_cols[cat_cols["cardinalidade"] <= cutoff_encoding]["nome_variavel"].tolist()
+    cat_cols_label_encoding = cat_cols[cat_cols["cardinalidade"] > cutoff_encoding]["nome_variavel"].tolist()
+else:
+    cat_cols_one_hot = []
+    cat_cols_label_encoding = []
+
+# Identificar Numéricas
+num_cols = (metadata_filtered[metadata_filtered["tipo"].isin([np.dtype("float64"), np.dtype("int64")])]
+            ["nome_variavel"]
+            .to_list()
+            )
+
+print(f"Colunas removidas por excesso de nulos: {len(cols_high_null_drop)}")
+print(f"Colunas numéricas: {len(num_cols)}")
+print(f"Colunas categóricas (OneHot): {len(cat_cols_one_hot)}")
+print(f"Colunas categóricas (LabelEncond): {len(cat_cols_label_encoding)}")
+
 # %%
 # TRATAMENTO DE NULOS
 # Fill missing values
@@ -242,3 +280,4 @@ submission_df = pd.DataFrame({
 
 submission_df.to_csv("../porto_seguro/data/submission_final.csv", index=False)
 print("Arquivo de submissão 'submission_final.csv' gerado com sucesso.")
+# %%

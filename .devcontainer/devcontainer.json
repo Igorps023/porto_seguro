@@ -1,5 +1,5 @@
 {
-    "name": "Python 3.9 with Spark",
+    "name": "Python 3.10 with Spark",
     "build": {
         "dockerfile": "Dockerfile"
     },
