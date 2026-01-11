@@ -2,8 +2,13 @@
 .vscode/*
 *spark-warehouse/*
 tes.py
+model_prd.py
 code/explore.py
 code/explore copy.py
 porto_seguro/old_code.py
 pod_academy_functions.py
 data/*.csv
+mlflow.db
+mlartifacts/*
+classification_report.json
+model_prd.py
